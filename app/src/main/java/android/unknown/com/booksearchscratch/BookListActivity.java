@@ -1,5 +1,6 @@
 package android.unknown.com.booksearchscratch;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +10,8 @@ import android.unknown.com.booksearchscratch.HTTPclient.BookClient;
 import android.unknown.com.booksearchscratch.Model.Book;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
@@ -23,6 +26,7 @@ import java.util.ArrayList;
 import cz.msebera.android.httpclient.Header;
 
 public class BookListActivity extends AppCompatActivity {
+    public static final String BOOK_DETAIL_KEY = "book";
     private BookClient client;
     private ListView lvBooks;
     private BookAdapter bookAdapter;
@@ -31,15 +35,28 @@ public class BookListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_list);
+
         progress = (ProgressBar) findViewById(R.id.progress);
         lvBooks = (ListView) findViewById(R.id.lvBooks);
         ArrayList<Book> aBooks = new ArrayList<Book>();
         bookAdapter = new BookAdapter(this, aBooks);
         lvBooks.setAdapter(bookAdapter);
-
+        setupBookSelectedListener();
         //FOR OSCAR WILDE LOVERS ONLY
         //fetchBooks("Oscar Wilde");
 
+    }
+
+    private void setupBookSelectedListener() {
+        lvBooks.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Launch the detail view passing book as an extra
+                Intent intent = new Intent(BookListActivity.this, BookDetailActivity.class);
+                intent.putExtra(BOOK_DETAIL_KEY, bookAdapter.getItem(position));
+                startActivity(intent);
+            }
+        });
     }
 
     // Executes an API call to the OpenLibrary search endpoint, parses the results
